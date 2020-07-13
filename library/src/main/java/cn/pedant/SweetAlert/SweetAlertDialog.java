@@ -3,24 +3,22 @@ package cn.pedant.SweetAlert;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.Transformation;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 
+import com.google.android.material.button.MaterialButton;
 import com.pnikosis.materialishprogress.ProgressWheel;
-
-import java.util.List;
 
 public class SweetAlertDialog extends Dialog implements View.OnClickListener {
     private View mDialogView;
@@ -49,8 +47,8 @@ public class SweetAlertDialog extends Dialog implements View.OnClickListener {
     private View mSuccessRightMask;
     private Drawable mCustomImgDrawable;
     private ImageView mCustomImage;
-    private Button mConfirmButton;
-    private Button mCancelButton;
+    private MaterialButton mConfirmButton;
+    private MaterialButton mCancelButton;
     private ProgressHelper mProgressHelper;
     private FrameLayout mWarningFrame;
     private OnSweetClickListener mCancelClickListener;
@@ -80,20 +78,6 @@ public class SweetAlertDialog extends Dialog implements View.OnClickListener {
         mAlertType = alertType;
         mErrorInAnim = OptAnimationLoader.loadAnimation(getContext(), R.anim.error_frame_in);
         mErrorXInAnim = (AnimationSet)OptAnimationLoader.loadAnimation(getContext(), R.anim.error_x_in);
-        // 2.3.x system don't support alpha-animation on layer-list drawable
-        // remove it from animation set
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) {
-            List<Animation> childAnims = mErrorXInAnim.getAnimations();
-            int idx = 0;
-            for (;idx < childAnims.size();idx++) {
-                if (childAnims.get(idx) instanceof AlphaAnimation) {
-                    break;
-                }
-            }
-            if (idx < childAnims.size()) {
-                childAnims.remove(idx);
-            }
-        }
         mSuccessBowAnim = OptAnimationLoader.loadAnimation(getContext(), R.anim.success_bow_roate);
         mSuccessLayoutAnimSet = (AnimationSet)OptAnimationLoader.loadAnimation(getContext(), R.anim.success_mask_layout);
         mModalInAnim = (AnimationSet) OptAnimationLoader.loadAnimation(getContext(), R.anim.modal_in);
@@ -142,19 +126,19 @@ public class SweetAlertDialog extends Dialog implements View.OnClickListener {
 
         mDialogView = getWindow().getDecorView().findViewById(android.R.id.content);
         mTitleTextView = (TextView)findViewById(R.id.title_text);
-        mContentTextView = (TextView)findViewById(R.id.content_text);
-        mErrorFrame = (FrameLayout)findViewById(R.id.error_frame);
-        mErrorX = (ImageView)mErrorFrame.findViewById(R.id.error_x);
-        mSuccessFrame = (FrameLayout)findViewById(R.id.success_frame);
-        mProgressFrame = (FrameLayout)findViewById(R.id.progress_dialog);
-        mSuccessTick = (SuccessTickView)mSuccessFrame.findViewById(R.id.success_tick);
+        mContentTextView = (TextView) findViewById(R.id.content_text);
+        mErrorFrame = (FrameLayout) findViewById(R.id.error_frame);
+        mErrorX = (ImageView) mErrorFrame.findViewById(R.id.error_x);
+        mSuccessFrame = (FrameLayout) findViewById(R.id.success_frame);
+        mProgressFrame = (FrameLayout) findViewById(R.id.progress_dialog);
+        mSuccessTick = (SuccessTickView) mSuccessFrame.findViewById(R.id.success_tick);
         mSuccessLeftMask = mSuccessFrame.findViewById(R.id.mask_left);
         mSuccessRightMask = mSuccessFrame.findViewById(R.id.mask_right);
-        mCustomImage = (ImageView)findViewById(R.id.custom_image);
-        mWarningFrame = (FrameLayout)findViewById(R.id.warning_frame);
-        mConfirmButton = (Button)findViewById(R.id.confirm_button);
-        mCancelButton = (Button)findViewById(R.id.cancel_button);
-        mProgressHelper.setProgressWheel((ProgressWheel)findViewById(R.id.progressWheel));
+        mCustomImage = (ImageView) findViewById(R.id.custom_image);
+        mWarningFrame = (FrameLayout) findViewById(R.id.warning_frame);
+        mConfirmButton = findViewById(R.id.confirm_button);
+        mCancelButton = findViewById(R.id.cancel_button);
+        mProgressHelper.setProgressWheel((ProgressWheel) findViewById(R.id.progressWheel));
         mConfirmButton.setOnClickListener(this);
         mCancelButton.setOnClickListener(this);
 
@@ -174,7 +158,8 @@ public class SweetAlertDialog extends Dialog implements View.OnClickListener {
         mProgressFrame.setVisibility(View.GONE);
         mConfirmButton.setVisibility(View.VISIBLE);
 
-        mConfirmButton.setBackgroundResource(R.drawable.blue_button_background);
+        mConfirmButton.setBackgroundTintList(ColorStateList
+                .valueOf(ContextCompat.getColor(getContext(), R.color.blue_btn_bg_color)));
         mErrorFrame.clearAnimation();
         mErrorX.clearAnimation();
         mSuccessTick.clearAnimation();
@@ -203,21 +188,28 @@ public class SweetAlertDialog extends Dialog implements View.OnClickListener {
             switch (mAlertType) {
                 case ERROR_TYPE:
                     mErrorFrame.setVisibility(View.VISIBLE);
+                    mConfirmButton.setBackgroundTintList(ColorStateList
+                            .valueOf(ContextCompat.getColor(getContext(), R.color.blue_btn_bg_color)));
                     break;
                 case SUCCESS_TYPE:
                     mSuccessFrame.setVisibility(View.VISIBLE);
                     // initial rotate layout of success mask
                     mSuccessLeftMask.startAnimation(mSuccessLayoutAnimSet.getAnimations().get(0));
                     mSuccessRightMask.startAnimation(mSuccessLayoutAnimSet.getAnimations().get(1));
+                    mConfirmButton.setBackgroundTintList(ColorStateList
+                            .valueOf(ContextCompat.getColor(getContext(), R.color.blue_btn_bg_color)));
                     break;
                 case WARNING_TYPE:
-                    mConfirmButton.setBackgroundResource(R.drawable.red_button_background);
+                    mConfirmButton.setBackgroundTintList(ColorStateList
+                            .valueOf(ContextCompat.getColor(getContext(), R.color.red_btn_bg_color)));
                     mWarningFrame.setVisibility(View.VISIBLE);
                     break;
                 case CUSTOM_IMAGE_TYPE:
                     setCustomImage(mCustomImgDrawable);
                     break;
                 case PROGRESS_TYPE:
+                    mConfirmButton.setBackgroundTintList(ColorStateList
+                            .valueOf(ContextCompat.getColor(getContext(), R.color.blue_btn_bg_color)));
                     mProgressFrame.setVisibility(View.VISIBLE);
                     mConfirmButton.setVisibility(View.GONE);
                     break;
